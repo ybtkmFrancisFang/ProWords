@@ -8,16 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { 
   RefreshCcw, Volume2, ChevronLeft, ChevronRight, 
-  BookOpen, BookText, CircleDashed, Bot, Sparkles,
+  BookOpen, BookText, Bot, Sparkles,
   GraduationCap, Home, ArrowRight, Moon, Sun
 } from "lucide-react"
 import { Loader2 } from "lucide-react"
 import { Identity, Word, DictionaryEntry } from "@/app/types/types"
 import { getWordsFromChapter } from '@/app/utils/wordUtils'
 import { Progress } from "@/components/ui/progress"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import Link from "next/link"
 import { ChapterComplete } from "@/components/ChapterComplete"
 
 export default function WordsPage() {

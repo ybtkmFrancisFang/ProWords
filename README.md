@@ -167,3 +167,35 @@ http://localhost:3000
 ## 📜 License
 
 MIT License
+
+# ProWords Project
+
+## Getting Started
+
+### Environment Setup
+
+1. Create a `.env.local` file in the project root:
+
+```bash
+# Create .env.local file
+touch .env.local
+```
+
+2. Add the following required environment variables to the `.env.local` file:
+
+```bash
+NEXT_PUBLIC_BASE_URL=your_api_base_url
+NEXT_PUBLIC_OPENAI_API_KEY=your_api_key
+```
+
+Example:
+```bash
+NEXT_PUBLIC_BASE_URL=https://api.rdsec.trendmicro.com/prod/aiendpoint/v1/
+NEXT_PUBLIC_OPENAI_API_KEY=your_jwt_token_here
+```
+
+These environment variables are essential for the application to connect to the required APIs.
+
+### Running the Project
+
+[Additional setup instructions will go here]
