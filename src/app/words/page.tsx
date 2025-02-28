@@ -733,7 +733,7 @@ export default function WordsPage() {
 
                     {/* Context sentences */}
                     <div className="relative z-10 border-t border-border/60 bg-background/40 backdrop-blur-md">
-                      <ScrollArea className="max-h-[400px]">
+                      <ScrollArea >
                         <div className="space-y-4 px-4 py-6">
                           <AnimatePresence mode="popLayout">
                             {Object.entries(currentWord.sentences).map(([profession, sentence], index) => (
