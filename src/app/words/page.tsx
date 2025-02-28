@@ -243,25 +243,16 @@ export default function WordsPage() {
 
   // When dictionary changes or chapter changes, fetch words
   useEffect(() => {
-    let controller: AbortController | null = null;
+    const controller = new AbortController();
 
     if (selectedIdentities.length > 0 && dictionary.length > 0 && chapter) {
-      // 如果有正在进行的请求，取消它
-      if (controller) {
-        controller.abort();
-      }
-      // 创建新的 controller
-      controller = new AbortController();
-      
       fetchWords();
       setCurrentWordIndex(0);
     }
 
     // 清理函数：组件卸载或依赖项改变时取消请求
     return () => {
-      if (controller) {
-        controller.abort();
-      }
+      controller.abort();
     };
   }, [selectedIdentities, dictionary, chapter, fetchWords]);
 
