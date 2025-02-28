@@ -39,7 +39,7 @@ export interface DictionaryEntry {
   ukphone: string;
 }
 
-// Add a declaration for canvas-confetti
+// Correctly declare the canvas-confetti module
 declare module 'canvas-confetti' {
   interface ConfettiOptions {
     particleCount?: number;
@@ -61,8 +61,7 @@ declare module 'canvas-confetti' {
     disableForReducedMotion?: boolean;
   }
 
-  type ConfettiFunction = (options?: ConfettiOptions) => Promise<null>;
-
-  const confetti: ConfettiFunction;
-  export default confetti;
+  // Just declare the function as the default value without export syntax
+  function confetti(options?: ConfettiOptions): Promise<null>;
+  // No export statement at all in module augmentation
 }
