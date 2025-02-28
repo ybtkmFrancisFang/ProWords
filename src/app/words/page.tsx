@@ -378,9 +378,6 @@ export default function WordsPage() {
     }
   };
 
-  // 计算当前进度
-  const progressPercentage = words.length ? (currentWordIndex + 1) / words.length * 100 : 0;
-
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-background via-background to-background/90 pb-20">
       {/* Decorative elements */}

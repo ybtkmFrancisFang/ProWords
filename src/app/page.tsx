@@ -19,10 +19,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Code2, Stethoscope, GraduationCap, Briefcase, Camera, X, User, Plus, Palette, ScaleIcon } from 'lucide-react';
+import { Code2, Stethoscope, GraduationCap, Briefcase, X, User, Plus, Palette, ScaleIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
-import Image from 'next/image';
 
 export default function Home() {
   const router = useRouter();

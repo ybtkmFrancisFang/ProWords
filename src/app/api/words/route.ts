@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import { NextRequest, NextResponse } from 'next/server';
-import { WordRequest, WordResponse, Profession } from '../../types/types';
+import { WordRequest, WordResponse } from '../../types/types';
 import { generatePrompt, mergeWordsWithSentences } from '../../utils/wordUtils';
 
 // 初始化 OpenAI 客户端
