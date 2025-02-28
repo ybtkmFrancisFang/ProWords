@@ -225,36 +225,34 @@ export default function WordsPage() {
     }
   }, [selectedIdentities, examType, chapter, currentWordIndex, words]);
 
-  // 当身份数据、考试类型或章节改变时获取新的单词数据
-  useEffect(() => {
-    // 如果有保存的状态且有单词数据，就不需要重新获取
-    const savedState = localStorage.getItem("wordLearningState");
-    if (savedState) {
-      const state = JSON.parse(savedState);
-      if (state.words && state.words.length > 0) {
-        return;
-      }
-    }
-
-    if (selectedIdentities.length > 0) {
-      fetchWords();
-    }
-  }, [selectedIdentities, fetchWords]);
-
-  // When dictionary changes or chapter changes, fetch words
+  // Combined effect for fetching words
   useEffect(() => {
     const controller = new AbortController();
-
+    
+    // Only proceed if we have all required data
     if (selectedIdentities.length > 0 && dictionary.length > 0 && chapter) {
+      // Check if we already have data in localStorage
+      const savedState = localStorage.getItem("wordLearningState");
+      if (savedState) {
+        const state = JSON.parse(savedState);
+        // If we have the same chapter and words data, don't fetch again
+        if (state.words && state.words.length > 0 && 
+            state.chapter === chapter && 
+            state.examType === examType) {
+          return;
+        }
+      }
+      
+      // Only fetch if we don't already have data
       fetchWords();
       setCurrentWordIndex(0);
     }
 
-    // 清理函数：组件卸载或依赖项改变时取消请求
+    // Cleanup function
     return () => {
       controller.abort();
     };
-  }, [selectedIdentities, dictionary, chapter, fetchWords]);
+  }, [selectedIdentities, dictionary, chapter, examType, fetchWords]);
 
   // 重新生成单个例句
   const handleRegenerateSentence = async (profession: string) => {
@@ -368,7 +366,6 @@ export default function WordsPage() {
   };
 
   const handleNextWord = () => {
-    console.log('handleNextWord', currentWordIndex, words.length - 1);
     // 如果当前已经在最后一个单词，再点击“下一个”才显示庆祝页面
     if (currentWordIndex === words.length - 1) {
       setIsChapterComplete(true);
