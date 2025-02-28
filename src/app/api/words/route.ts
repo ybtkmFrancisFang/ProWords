@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import { NextRequest, NextResponse } from 'next/server';
-import { WordRequest, WordResponse } from '../../types/types';
+import { Word, WordRequest, WordResponse, Profession } from '../../types/types';
 import { generatePrompt, mergeWordsWithSentences } from '../../utils/wordUtils';
 
 // 初始化 OpenAI 客户端
@@ -8,83 +8,91 @@ const client = new OpenAI({
     apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
     baseURL: process.env.NEXT_PUBLIC_BASE_URL
 });
-  
+
+// 单词分块大小
+const CHUNK_SIZE = 5;
+
+// 处理单个分块的单词
+async function processWordChunk(words: Word[], profession: Profession) {
+  const prompt = generatePrompt(words, profession);
+  const completion = await client.chat.completions.create({
+    messages: [{ role: 'user', content: prompt }],
+    model: 'o3-mini',
+    temperature: 0.7,
+    response_format: { type: 'json_object' },
+  });
+
+  const aiResponse = completion.choices[0].message.content;
+  if (!aiResponse) {
+    throw new Error('No response from OpenAI');
+  }
+
+  return { profession, aiResponse };
+}
 
 export async function POST(req: NextRequest) {
   try {
-      const { professions, words } = (await req.json()) as WordRequest;
-      //define response
-      const response: WordResponse = {
-        words: [],
-      };
+    const { professions, words } = (await req.json()) as WordRequest;
 
-      // Validate professions array
-      if (!professions || !Array.isArray(professions) || professions.length === 0) {
-        return NextResponse.json(
-          { error: 'Invalid request: professions must be a non-empty array' },
-          { status: 400 }
-        );
+    // 验证输入
+    if (!professions?.length || !words?.length) {
+      return NextResponse.json(
+        { error: 'Invalid request: professions and words must be non-empty arrays' },
+        { status: 400 }
+      );
+    }
+
+    // 初始化响应数组
+    const responseWords = words.map(word => ({
+      ...word,
+      sentences: new Map<string, string>(),
+    }));
+
+    // 将单词分块
+    const wordChunks: Word[][] = [];
+    for (let i = 0; i < words.length; i += CHUNK_SIZE) {
+      wordChunks.push(words.slice(i, i + CHUNK_SIZE));
+    }
+
+    // 并行处理所有分块和职业
+    const allPromises = wordChunks.flatMap(chunk =>
+      professions.map(profession => ({
+        chunk,
+        promise: processWordChunk(chunk, profession)
+          .catch(error => ({
+            error,
+            chunk,
+            profession,
+          }))
+      }))
+    );
+
+    // 等待所有请求完成
+    const results = await Promise.all(allPromises.map(({ promise }) => promise));
+
+    // 处理错误和成功的结果
+    const errors = [];
+    for (const result of results) {
+      if ('error' in result) {
+        errors.push(`Error processing chunk for ${result.profession.id}: ${result.error.message}`);
+        continue;
       }
+      mergeWordsWithSentences(responseWords, result.aiResponse, result.profession);
+    }
 
-      // Validate each profession has required fields
-      const invalidProfession = professions.find(p => !p || !p.id);
-      if (invalidProfession) {
-        return NextResponse.json(
-          { error: 'Invalid profession: each profession must have id' },
-          { status: 400 }
-        );
-      }
-      
-      // Validate words array
-      if (!words || !Array.isArray(words) || words.length === 0) {
-        return NextResponse.json(
-          { error: 'Invalid request: words must be a non-empty array' },
-          { status: 400 }
-        );
-      }
+    // 如果有错误，记录到响应中
+    if (errors.length > 0) {
+      console.error('Some chunks failed:', errors);
+    }
 
-      // Validate each word has required fields
-      const invalidWord = words.find(w => !w || !w.word || !Array.isArray(w.trans));
-      if (invalidWord) {
-        return NextResponse.json(
-          { error: 'Invalid word: each word must have word and trans array', word: invalidWord },
-          { status: 400 }
-        );
-      }
-      // Initialize response with deep copy of words array
-      response.words = words.map(word => ({
-        ...word,
-        sentences: new Map<string, string>(),
-      }));
-
-      for (const profession of professions) {
-        // 生成提示词并调用 OpenAI API
-        const prompt = generatePrompt(words, profession);
-        const completion = await client.chat.completions.create({
-          messages: [{ role: 'user', content: prompt }],
-          model: 'o3-mini',
-          temperature: 0.7,
-          response_format: { type: 'json_object' },
-        });
-
-        const aiResponse = completion.choices[0].message.content;
-        if (!aiResponse) {
-          throw new Error('No response from OpenAI');
-        }
-
-        // Log the response for debugging
-        
-        // Update sentences in the deep copied array
-        mergeWordsWithSentences(response.words, aiResponse, profession);
-      }
-    // Convert Map to regular object before sending response
+    // 序列化响应
     const serializedResponse = {
-      words: response.words.map(word => ({
+      words: responseWords.map(word => ({
         ...word,
         sentences: Object.fromEntries(word.sentences)
       }))
     };
-    
+
     return NextResponse.json(serializedResponse);
   } catch (error) {
     console.error('Error:', error);

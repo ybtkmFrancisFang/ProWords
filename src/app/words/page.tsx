@@ -76,9 +76,6 @@ export default function WordsPage() {
       
       const data = await response.json();
       setDictionary(data.dictionary);
-      
-      // Don't auto-select chapter anymore, let user choose
-      // setChapter("1");
     } catch (err) {
       console.error('Error fetching dictionary:', err);
       setError(err instanceof Error ? err.message : 'Failed to load dictionary');
@@ -225,34 +222,39 @@ export default function WordsPage() {
     }
   }, [selectedIdentities, examType, chapter, currentWordIndex, words]);
 
-  // Combined effect for fetching words
+  // 当章节改变时获取新的单词数据
   useEffect(() => {
-    const controller = new AbortController();
-    
-    // Only proceed if we have all required data
-    if (selectedIdentities.length > 0 && dictionary.length > 0 && chapter) {
-      // Check if we already have data in localStorage
-      const savedState = localStorage.getItem("wordLearningState");
-      if (savedState) {
-        const state = JSON.parse(savedState);
-        // If we have the same chapter and words data, don't fetch again
-        if (state.words && state.words.length > 0 && 
-            state.chapter === chapter && 
-            state.examType === examType) {
-          return;
-        }
-      }
-      
-      // Only fetch if we don't already have data
-      fetchWords();
-      setCurrentWordIndex(0);
+    // 如果没有选择章节，不做任何操作
+    if (!chapter) return;
+
+    // 检查是否有必要的数据
+    if (!selectedIdentities.length || !dictionary.length) {
+      console.log('缺少必要数据:', { 
+        hasIdentities: selectedIdentities.length > 0, 
+        hasDictionary: dictionary.length > 0 
+      });
+      return;
     }
 
-    // Cleanup function
-    return () => {
-      controller.abort();
-    };
-  }, [selectedIdentities, dictionary, chapter, examType, fetchWords]);
+    // 检查 localStorage 中是否有相同章节的数据
+    const savedState = localStorage.getItem("wordLearningState");
+    if (savedState) {
+      const state = JSON.parse(savedState);
+      if (state.words?.length > 0 && 
+          state.chapter === chapter && 
+          state.examType === examType) {
+        console.log('使用缓存数据:', { chapter, examType });
+        setWords(state.words);
+        setCurrentWordIndex(state.currentWordIndex || 0);
+        return;
+      }
+    }
+
+    // 获取新数据
+    console.log('获取新数据:', { chapter, examType });
+    fetchWords();
+    setCurrentWordIndex(0);
+  }, [chapter, selectedIdentities, dictionary, examType, fetchWords]);
 
   // 重新生成单个例句
   const handleRegenerateSentence = async (profession: string) => {
@@ -447,7 +449,13 @@ export default function WordsPage() {
             <div className="group relative">
               <Select 
                 value={chapter} 
-                onValueChange={setChapter}
+                onValueChange={(value) => {
+                  setChapter(value);
+                  // 重置状态
+                  setWords([]);
+                  setCurrentWordIndex(0);
+                  setIsChapterComplete(false);
+                }}
                 disabled={!examType || CHAPTERS.length === 0 || dictionaryLoading}
               >
                 <SelectTrigger className="w-[180px] bg-background/80 shadow-sm transition-all group-hover:border-primary/50">
