@@ -26,7 +26,8 @@ export default function WordsPage() {
   const [dictionaryLoading, setDictionaryLoading] = useState(false)
   const [, setRegeneratingProfession] = useState<string | null>(null);
   const [isChapterComplete, setIsChapterComplete] = useState(false)
-
+  const [isRestoring, setIsRestoring] = useState(false); // 标记是否正在恢复数据
+  const [usingLocalStorage, setUsingLocalStorage] = useState(true); // 标记是否使用 localStorage
   // Calculate chapters dynamically based on dictionary length
   const CHAPTERS = useMemo(() => {
     const wordsPerChapter = 20;
@@ -53,10 +54,7 @@ export default function WordsPage() {
     sentences: {},
   }
 
-  // Clear chapter selection when dictionary type changes
-  useEffect(() => {
-    setChapter("");
-  }, [examType]);
+
 
   // 获取词典数据
   const fetchDictionary = useCallback(async () => {
@@ -156,11 +154,13 @@ export default function WordsPage() {
       const state = JSON.parse(savedState);
       if (state.selectedIdentities?.length > 0) {
         // 恢复所有保存的状态
+        setIsRestoring(true);
         setSelectedIdentities(state.selectedIdentities);
         setExamType(state.examType || "");
         setChapter(state.chapter || "");
         setCurrentWordIndex(state.currentWordIndex || 0);
         setWords(state.words || []);
+        setIsRestoring(false);
         // 如果有完整的学习状态，就不需要重定向到首页
         return;
       }
@@ -180,6 +180,14 @@ export default function WordsPage() {
     window.location.href = "/";
   }, []);  // 只在组件挂载时执行一次
 
+    // Clear chapter selection when dictionary type changes,but if come for the previous chapter from localstorage, keep it
+  useEffect(() => {
+    if (!usingLocalStorage) {
+      console.log('Dictionary type changed, clearing chapter unless restoring from localStorage');
+      setChapter("");
+    }
+  }, [examType]);
+
   // 检查是否选择了职业
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -193,7 +201,7 @@ export default function WordsPage() {
 
   // 保存状态到 localStorage
   useEffect(() => {
-    if (selectedIdentities.length > 0) {
+    if (!isRestoring &&selectedIdentities.length > 0) {
       const stateToSave = {
         selectedIdentities,
         examType,
@@ -203,7 +211,7 @@ export default function WordsPage() {
       };
       localStorage.setItem("wordLearningState", JSON.stringify(stateToSave));
     }
-  }, [selectedIdentities, examType, chapter, currentWordIndex, words]);
+  }, [currentWordIndex, words]);
 
   // 当章节改变时获取新的单词数据
   useEffect(() => {
@@ -211,22 +219,24 @@ export default function WordsPage() {
     if (!chapter) return;
 
     // 检查是否有必要的数据
-    if (!selectedIdentities.length || !dictionary.length) {
+    if (!selectedIdentities.length ) {
       console.log('缺少必要数据:', { 
         hasIdentities: selectedIdentities.length > 0, 
-        hasDictionary: dictionary.length > 0 
       });
       return;
     }
 
     // 检查 localStorage 中是否有相同章节的数据
     const savedState = localStorage.getItem("wordLearningState");
-    if (savedState && words.length === 0) {
+    console.log('savedState:', savedState);
+    if (savedState) {
       const state = JSON.parse(savedState);
+      console.log(state.chapter === chapter, state.examType === examType);
       if (state.words?.length > 0 && 
           state.chapter === chapter && 
           state.examType === examType) {
         console.log('使用缓存数据:', { chapter, examType });
+        setUsingLocalStorage(true);
         setWords(state.words);
         setCurrentWordIndex(state.currentWordIndex || 0);
         return;
@@ -235,9 +245,11 @@ export default function WordsPage() {
 
     // 获取新数据
     console.log('获取新数据:', { chapter, examType });
+    setUsingLocalStorage(false);
     fetchWords();
     setCurrentWordIndex(0);
-  }, [chapter, selectedIdentities, dictionary, examType, fetchWords, words.length]);
+    setChapter(chapter);
+  }, [chapter,  examType]);
 
   // 重新生成单个例句
   const handleRegenerateSentence = async (profession: string) => {
@@ -535,24 +547,6 @@ export default function WordsPage() {
           )}
         </AnimatePresence>
 
-        {/* Chapter Complete Modal */}
-        <AnimatePresence>
-          {isChapterComplete && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-            >
-              <ChapterComplete
-                chapter={chapter}
-                chapterCount={CHAPTERS.length}
-                onNextChapter={handleNextChapter}
-                onReviewChapter={handleReviewChapter}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
       </main>
     </div>
   )
