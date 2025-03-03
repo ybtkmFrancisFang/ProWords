@@ -1,9 +1,6 @@
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Word } from "@/app/types/types";
 import { WordSentences } from "@/components/words/WordSentences";
-import { ArrowRight } from "lucide-react";
 
 interface WordCardProps {
   currentWord: Word;

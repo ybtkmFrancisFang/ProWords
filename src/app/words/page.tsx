@@ -24,7 +24,7 @@ export default function WordsPage() {
   const [error, setError] = useState<string | null>(null)
   const [dictionary, setDictionary] = useState<DictionaryEntry[]>([])
   const [dictionaryLoading, setDictionaryLoading] = useState(false)
-  const [regeneratingProfession, setRegeneratingProfession] = useState<string | null>(null);
+  const [, setRegeneratingProfession] = useState<string | null>(null);
   const [isChapterComplete, setIsChapterComplete] = useState(false)
 
   // Calculate chapters dynamically based on dictionary length
