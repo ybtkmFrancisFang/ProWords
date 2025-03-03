@@ -4,19 +4,15 @@ import { useState, useEffect, useCallback, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { 
-  RefreshCcw, Volume2, ChevronLeft, ChevronRight, 
-  BookOpen, BookText, Bot, Sparkles,
-  GraduationCap, Home, ArrowRight, Moon, Sun
-} from "lucide-react"
-import { Loader2 } from "lucide-react"
+import { BookOpen, Bot, Sparkles } from "lucide-react"
 import { Identity, Word, DictionaryEntry } from "@/app/types/types"
 import { getWordsFromChapter } from '@/app/utils/wordUtils'
-import { Progress } from "@/components/ui/progress"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { ChapterComplete } from "@/components/ChapterComplete"
+
+// Import the components from src/components/words/
+import { WordHeader } from "@/components/words/WordHeader"
+import { StudyConfiguration } from "@/components/words/StudyConfiguration"
+import { WordCard } from "@/components/words/WordCard"
 
 export default function WordsPage() {
   const [examType, setExamType] = useState<"CET4" | "CET6" | "">("")
@@ -103,19 +99,6 @@ export default function WordsPage() {
     const utterance = new SpeechSynthesisUtterance(sentence);
     utterance.lang = 'en-US';
     window.speechSynthesis.speak(utterance);
-  };
-
-  // 高亮句子中的单词
-  const highlightWord = (sentence: string, word: string) => {
-    // 创建一个不区分大小写的正则表达式
-    const regex = new RegExp(`(${word})`, 'gi');
-    const parts = sentence.split(regex);
-    
-    return parts.map((part, index) => 
-      part.toLowerCase() === word.toLowerCase() ? 
-        <span key={index} className="bg-yellow-200 dark:bg-yellow-900 px-1 rounded">{part}</span> : 
-        part
-    );
   };
 
   // 获取单词数据
@@ -238,7 +221,7 @@ export default function WordsPage() {
 
     // 检查 localStorage 中是否有相同章节的数据
     const savedState = localStorage.getItem("wordLearningState");
-    if (savedState) {
+    if (savedState && words.length === 0) {
       const state = JSON.parse(savedState);
       if (state.words?.length > 0 && 
           state.chapter === chapter && 
@@ -254,7 +237,7 @@ export default function WordsPage() {
     console.log('获取新数据:', { chapter, examType });
     fetchWords();
     setCurrentWordIndex(0);
-  }, [chapter, selectedIdentities, dictionary, examType, fetchWords]);
+  }, [chapter, selectedIdentities, dictionary, examType, fetchWords, words.length]);
 
   // 重新生成单个例句
   const handleRegenerateSentence = async (profession: string) => {
@@ -339,8 +322,11 @@ export default function WordsPage() {
           return newWords;
         });
       }
+      
+      return true;
     } catch (err) {
       console.error('Error regenerating sentence:', err);
+      return false;
     } finally {
       setRegeneratingProfession(null);
     }
@@ -353,6 +339,19 @@ export default function WordsPage() {
       setChapter(nextChapter);
       setCurrentWordIndex(0);
       setIsChapterComplete(false);
+      
+      // Force clear the current words to ensure we fetch new ones
+      setWords([]);
+      
+      // Explicitly update localStorage to prevent using cached words
+      const currentState = JSON.parse(localStorage.getItem("wordLearningState") || "{}");
+      const updatedState = {
+        ...currentState,
+        chapter: nextChapter,
+        currentWordIndex: 0,
+        words: [] // Clear words in localStorage
+      };
+      localStorage.setItem("wordLearningState", JSON.stringify(updatedState));
     }
   }, [chapter, CHAPTERS.length]);
 
@@ -362,19 +361,31 @@ export default function WordsPage() {
     setIsChapterComplete(false);
   }, []);
 
+  // Handle resetting learning
+  const onResetLearning = () => {
+    // Clear all saved states
+    localStorage.removeItem("wordLearningState");
+    // Redirect to home page
+    window.location.href = "/";
+  };
+
   // 处理上一个/下一个单词
   const handlePrevWord = () => {
     setCurrentWordIndex(prev => Math.max(0, prev - 1));
   };
 
   const handleNextWord = () => {
-    // 如果当前已经在最后一个单词，再点击“下一个”才显示庆祝页面
+    // If current word is the last one, clicking "next" will show the celebration page
     if (currentWordIndex === words.length - 1) {
       setIsChapterComplete(true);
     } else {
-      // 否则继续下一个单词
+      // Otherwise continue to the next word
       setCurrentWordIndex(prev => Math.min(prev + 1, words.length - 1));
     }
+  };
+
+  const handleChapterComplete = () => {
+    setIsChapterComplete(true);
   };
 
   return (
@@ -384,122 +395,20 @@ export default function WordsPage() {
       <div className="absolute right-0 top-1/4 h-72 w-72 rounded-full bg-purple-500/5 blur-3xl"></div>
       
       {/* Header with navigation */}
-      <header className="border-b border-border/40 bg-background/60 backdrop-blur-lg">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Button
-            variant="ghost"
-            className="flex items-center gap-2 hover:bg-background/80"
-            onClick={() => {
-              // 清除所有保存的状态
-              localStorage.removeItem("wordLearningState");
-              // 重定向到首页
-              window.location.href = "/";
-            }}
-          >
-            <Home className="h-5 w-5" />
-            <span className="font-semibold">重置</span>
-          </Button>
-          
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full"
-            onClick={() => document.documentElement.classList.toggle('dark')}
-          >
-            <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          </Button>
-        </div>
-      </header>
+      <WordHeader onResetLearning={onResetLearning} />
 
       <main className="container mx-auto px-4 py-8">
-        {/* Study configuration panel - 改进设计 */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8 p-5"
-        >
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <div className="group relative">
-              <Select value={examType} onValueChange={(value: "CET4" | "CET6" | "") => setExamType(value)}>
-                <SelectTrigger className="w-[180px] bg-background/80 shadow-sm transition-all group-hover:border-primary/50">
-                  <SelectValue placeholder="选择词典" />
-                </SelectTrigger>
-                <SelectContent className="border-primary/10">
-                  <SelectItem value="CET4" className="cursor-pointer">
-                    <div className="flex items-center gap-2">
-                      <GraduationCap className="h-4 w-4 text-blue-500" />
-                      <span>CET-4</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="CET6" className="cursor-pointer">
-                    <div className="flex items-center gap-2">
-                      <GraduationCap className="h-4 w-4 text-purple-500" />
-                      <span>CET-6</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              
-              {examType && (
-                <div className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-primary shadow-glow animate-pulse"></div>
-              )}
-            </div>
-
-            <div className="group relative">
-              <Select 
-                value={chapter} 
-                onValueChange={(value) => {
-                  setChapter(value);
-                  // 重置状态
-                  setWords([]);
-                  setCurrentWordIndex(0);
-                  setIsChapterComplete(false);
-                }}
-                disabled={!examType || CHAPTERS.length === 0 || dictionaryLoading}
-              >
-                <SelectTrigger className="w-[180px] bg-background/80 shadow-sm transition-all group-hover:border-primary/50">
-                  <SelectValue placeholder={
-                    !examType 
-                      ? "请先选择词典" 
-                      : dictionaryLoading 
-                        ? "加载中..." 
-                        : "选择章节"
-                  } />
-                </SelectTrigger>
-                <SelectContent className="max-h-[40vh]">
-                  {CHAPTERS.map((chapter) => (
-                    <SelectItem key={chapter.id} value={chapter.id} className="cursor-pointer">
-                      {chapter.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              {chapter && (
-                <div className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-purple-500 shadow-glow animate-pulse"></div>
-              )}
-            </div>
-
-            {dictionaryLoading ? (
-              <div className="flex items-center gap-2 rounded-full bg-background/70 px-3 py-1.5 text-sm text-muted-foreground shadow-sm backdrop-blur-sm">
-                <Loader2 className="h-3.5 w-3.5 animate-spin text-primary/70" />
-                <span>加载词典...</span>
-              </div>
-            ) : dictionary.length > 0 && (
-              <div className="flex items-center gap-2 rounded-full bg-background/70 px-3 py-1.5 text-sm text-muted-foreground shadow-sm backdrop-blur-sm">
-                <BookText className="h-3.5 w-3.5 text-primary/70" />
-                <span>{dictionary.length} 词汇</span>
-                <span className="mx-1 text-muted-foreground/30">|</span>
-                <span>{CHAPTERS.length} 章节</span>
-              </div>
-            )}
-          </div>
-
-          {/* 装饰元素 */}
-          <div className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-purple-500/5 blur-xl"></div>
-          <div className="absolute -left-10 -bottom-10 h-24 w-24 rounded-full bg-blue-500/5 blur-xl"></div>
-        </motion.div>
+        {/* Study configuration panel */}
+        <StudyConfiguration
+          examType={examType}
+          setExamType={setExamType}
+          chapter={chapter}
+          setChapter={setChapter}
+          dictionaryLoading={dictionaryLoading}
+          dictionaryLength={dictionary.length}
+          chaptersLength={CHAPTERS.length}
+          chapters={CHAPTERS}
+        />
 
         {/* Word card */}
         <AnimatePresence mode="wait">
@@ -589,211 +498,18 @@ export default function WordsPage() {
                     </Button>
                   </div>
                 ) : words.length > 0 ? (
-                  <div className="group relative">
-                    {/* Background accent */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-purple-500/5"></div>
-                    
-                    {/* Word header */}
-                    <div className="relative z-10 bg-background/60 p-8 backdrop-blur-sm">
-                      <div className="flex items-center justify-between gap-4">
-                        <Button 
-                          variant="outline" 
-                          size="icon"
-                          className="h-10 w-10 shrink-0 rounded-full border-primary/20 bg-background/40 shadow-sm backdrop-blur-sm transition-all hover:border-primary/40 hover:bg-background/60 hover:shadow-md"
-                          onClick={handlePrevWord}
-                          disabled={currentWordIndex === 0}
-                        >
-                          <ChevronLeft className="h-5 w-5" />
-                        </Button>
-
-                        <div className="flex items-center gap-3">
-                          <motion.h2 
-                            key={currentWord.word}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="text-center text-4xl font-bold tracking-tighter"
-                          >
-                            {currentWord.word}
-                          </motion.h2>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => playWordAudio(currentWord.word)}
-                            className="h-9 w-9 rounded-full text-primary transition-transform hover:scale-110"
-                          >
-                            <Volume2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-
-                        <Button 
-                          variant="outline" 
-                          size="icon"
-                          className="h-10 w-10 shrink-0 rounded-full border-primary/20 bg-background/40 shadow-sm backdrop-blur-sm transition-all hover:border-primary/40 hover:bg-background/60 hover:shadow-md"
-                          onClick={handleNextWord}
-                          disabled={currentWordIndex === words.length - 1}
-                        >
-                          <ChevronRight className="h-5 w-5" />
-                        </Button>
-                      </div>
-                      
-                      {/* Pronunciation */}
-                      <div className="mt-4 flex justify-center gap-8 text-muted-foreground">
-                        <motion.div 
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.1 }}
-                          className="group flex items-center gap-2 rounded-full bg-background/40 px-3 py-1 backdrop-blur-sm"
-                        >
-                          <span className="text-xs font-medium uppercase text-muted-foreground/70">US:</span>
-                          <span className="font-mono text-sm">{currentWord.usphone}</span>
-                        </motion.div>
-                        <motion.div 
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.2 }}
-                          className="group flex items-center gap-2 rounded-full bg-background/40 px-3 py-1 backdrop-blur-sm"
-                        >
-                          <span className="text-xs font-medium uppercase text-muted-foreground/70">UK:</span>
-                          <span className="font-mono text-sm">{currentWord.ukphone}</span>
-                        </motion.div>
-                      </div>
-                      
-                      {/* Meaning */}
-                      <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.3 }}
-                        className="mt-6 space-y-1.5 text-center"
-                      >
-                        {currentWord.trans.map((meaning, index) => (
-                          <div key={index} className="text-lg text-foreground/80">{meaning}</div>
-                        ))}
-                      </motion.div>
-                    </div>
-                    
-                    {/* Progress */}
-                    <div className="relative z-10 border-t border-border/60 bg-background/40 px-6 py-4 backdrop-blur-md">
-                      <div className="flex flex-col gap-2">
-                        <div className="flex items-center justify-between text-sm font-medium">
-                          <div>
-                            <span className="text-base font-bold text-primary">{currentWordIndex + 1}</span>
-                            <span className="text-muted-foreground"> / {words.length}</span>
-                          </div>
-                        </div>
-
-                        <div className="relative">
-                          <Progress 
-                            value={(currentWordIndex + 1) / words.length * 100} 
-                            className="h-2"
-                          />
-                          {currentWordIndex === words.length - 1 && (
-                            <motion.div
-                              initial={{ opacity: 0, scale: 0.9 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              className="absolute -right-1 -top-6"
-                            >
-                              <Button
-                                onClick={() => setIsChapterComplete(true)}
-                                variant="outline"
-                                size="sm"
-                                className="group relative flex items-center gap-1.5 border-green-500/30 bg-green-500/10 text-green-600 hover:bg-green-500/20 hover:text-green-700 dark:border-green-400/30 dark:text-green-400 dark:hover:text-green-300"
-                              >
-                                <motion.div
-                                  animate={{ 
-                                    x: [0, 3, 0],
-                                  }}
-                                  transition={{ 
-                                    duration: 1.5, 
-                                    repeat: Infinity,
-                                    ease: "easeInOut" 
-                                  }}
-                                  className="flex items-center gap-1"
-                                >
-                                  下一章
-                                  <ArrowRight className="h-3.5 w-3.5" />
-                                </motion.div>
-                                <motion.div
-                                  className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-green-500"
-                                  animate={{
-                                    scale: [1, 1.5, 1],
-                                    opacity: [0.5, 1, 0.5]
-                                  }}
-                                  transition={{
-                                    duration: 2,
-                                    repeat: Infinity,
-                                    ease: "easeInOut"
-                                  }}
-                                />
-                              </Button>
-                            </motion.div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Context sentences */}
-                    <div className="relative z-10 border-t border-border/60 bg-background/40 backdrop-blur-md">
-                      <ScrollArea >
-                        <div className="space-y-4 px-4 py-6">
-                          <AnimatePresence mode="popLayout">
-                            {Object.entries(currentWord.sentences).map(([profession, sentence], index) => (
-                              <motion.div
-                                key={`${profession}-${currentWordIndex}`}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -20 }}
-                                transition={{ duration: 0.3, delay: index * 0.1 }}
-                              >
-                                <Card className="group overflow-hidden border-border/60 transition-all duration-300 hover:border-primary/40 hover:shadow-md bg-card/60">
-                                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/40 bg-card/80 px-4 py-3">
-                                    <Badge variant="outline" className="bg-primary/5 px-3 py-1 text-xs font-medium whitespace-normal">
-                                      {profession}
-                                    </Badge>
-                                    <div className="flex items-center gap-2 shrink-0">
-                                      <Button
-                                        size="icon"
-                                        variant="ghost"
-                                        className="h-8 w-8 rounded-full opacity-70 transition-opacity hover:bg-background hover:opacity-100"
-                                        onClick={() => handleRegenerateSentence(profession)}
-                                        disabled={regeneratingProfession === profession}
-                                      >
-                                        {regeneratingProfession === profession ? (
-                                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                        ) : (
-                                          <RefreshCcw className="h-3.5 w-3.5" />
-                                        )}
-                                      </Button>
-                                      <Button
-                                        size="icon"
-                                        variant="ghost"
-                                        className="h-8 w-8 rounded-full opacity-70 transition-opacity hover:bg-background hover:opacity-100"
-                                        onClick={() => playSentenceAudio(sentence)}
-                                      >
-                                        <Volume2 className="h-3.5 w-3.5" />
-                                      </Button>
-                                    </div>
-                                  </div>
-                                  
-                                  <div className="bg-background/40 px-4 py-3 backdrop-blur-sm">
-                                    {regeneratingProfession === profession ? (
-                                      <div className="flex items-center justify-center py-6">
-                                        <div className="flex items-center gap-3">
-                                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                                          <span className="text-sm font-medium text-primary">重新生成例句...</span>
-                                        </div>
-                                      </div>
-                                    ) : (
-                                      <p className="text-lg leading-relaxed">{highlightWord(sentence, currentWord.word)}</p>
-                                    )}
-                                  </div>
-                                </Card>
-                              </motion.div>
-                            ))}
-                          </AnimatePresence>
-                        </div>
-                      </ScrollArea>
-                    </div>
-                  </div>
+                  <WordCard
+                    currentWord={currentWord}
+                    currentWordIndex={currentWordIndex}
+                    wordsLength={words.length}
+                    handlePrevWord={handlePrevWord}
+                    handleNextWord={handleNextWord}
+                    playWordAudio={playWordAudio}
+                    handleRegenerateSentence={handleRegenerateSentence}
+                    playSentenceAudio={playSentenceAudio}
+                    isLastWord={currentWordIndex === words.length - 1}
+                    onChapterComplete={handleChapterComplete}
+                  />
                 ) : (
                   <div className="flex flex-col items-center justify-center py-20 text-center">
                     <motion.div 
@@ -837,11 +553,7 @@ export default function WordsPage() {
             </motion.div>
           )}
         </AnimatePresence>
-
-
       </main>
-
-
     </div>
   )
 }
