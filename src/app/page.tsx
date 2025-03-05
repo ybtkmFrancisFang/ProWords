@@ -417,7 +417,7 @@ export default function Home() {
                 </DialogDescription>
               </DialogHeader>
               <div className="flex justify-center p-4">
-                <img src="/coffee/c.png" alt="Buy Me a Coffee QR Code" className="max-h-64 w-auto" />
+                <img src="/api/qrcode" alt="Buy Me a Coffee QR Code" className="max-h-64 w-auto" />
               </div>
             </DialogContent>
           </Dialog>
