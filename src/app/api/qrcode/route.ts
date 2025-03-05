@@ -13,7 +13,8 @@ export async function GET() {
         'Cache-Control': 'public, max-age=31536000, immutable',
       },
     });
-  } catch (_error) {
+  } catch (error) {
+    console.error(error);
     return new NextResponse('Error loading QR code', { status: 500 });
   }
 }
