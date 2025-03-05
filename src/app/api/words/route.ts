@@ -14,7 +14,7 @@ const CHUNK_SIZE = 5;
 
 // 处理单个分块的单词
 // 将函数改为导出
-export async function processWordChunk(words: Word[], profession: Profession) {
+async function processWordChunk(words: Word[], profession: Profession) {
   const startTime = performance.now();
   console.time(`processWordChunk-${profession.id}`);
 
