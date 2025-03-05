@@ -1,4 +1,4 @@
-# ProWords | 专业化英语学习平台
+# ProWords
 
 <p align="center">
   <img src="https://img.shields.io/badge/AI%20Powered-GPT-blue?style=for-the-badge&logo=openai" alt="AI Powered" />
