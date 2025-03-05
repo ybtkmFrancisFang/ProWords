@@ -31,6 +31,15 @@ export interface Identity {
   description: string;
 }
 
+export enum DictType {
+  CET4 = 'CET4',
+  CET6 = 'CET6',
+  GRE = 'GRE',
+  PTE='PTE',
+  TOEFL='TOEFL',
+  IELTS='IELTS',
+  KAOYAN='KAOYAN',
+}
 
 export interface DictionaryEntry {
   name: string;

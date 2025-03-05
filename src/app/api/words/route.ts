@@ -13,7 +13,11 @@ const client = new OpenAI({
 const CHUNK_SIZE = 5;
 
 // 处理单个分块的单词
-async function processWordChunk(words: Word[], profession: Profession) {
+// 将函数改为导出
+export async function processWordChunk(words: Word[], profession: Profession) {
+  const startTime = performance.now();
+  console.time(`processWordChunk-${profession.id}`);
+
   const prompt = generatePrompt(words, profession);
   const completion = await client.chat.completions.create({
     messages: [{ role: 'user', content: prompt }],
@@ -26,6 +30,10 @@ async function processWordChunk(words: Word[], profession: Profession) {
   if (!aiResponse) {
     throw new Error('No response from OpenAI');
   }
+
+  const endTime = performance.now();
+  console.timeEnd(`processWordChunk-${profession.id}`);
+  console.log(`处理职业 ${profession.id} 的耗时: ${(endTime - startTime).toFixed(2)}ms`);
 
   return { profession, aiResponse };
 }

@@ -3,7 +3,7 @@ import { Word, DictionaryEntry, Identity } from "@/app/types/types";
 import { getWordsFromChapter } from '@/app/utils/wordUtils';
 
 export function useWordLearning() {
-  const [examType, setExamType] = useState<"CET4" | "CET6" | "">("");
+  const [examType, setExamType] = useState("");
   const [chapter, setChapter] = useState("");
   const [selectedIdentities, setSelectedIdentities] = useState<Identity[]>([]);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { BookOpen, Bot, Sparkles } from "lucide-react"
-import { Identity, Word, DictionaryEntry } from "@/app/types/types"
+import { Identity, Word, DictionaryEntry, DictType } from "@/app/types/types"
 import { getWordsFromChapter } from '@/app/utils/wordUtils'
 import { ChapterComplete } from "@/components/ChapterComplete"
 
@@ -15,7 +15,7 @@ import { StudyConfiguration } from "@/components/words/StudyConfiguration"
 import { WordCard } from "@/components/words/WordCard"
 
 export default function WordsPage() {
-  const [examType, setExamType] = useState<"CET4" | "CET6" | "">("")
+  const [examType, setExamType] = useState<DictType | "">("")
   const [chapter, setChapter] = useState("")
   const [selectedIdentities, setSelectedIdentities] = useState<Identity[]>([])
   const [currentWordIndex, setCurrentWordIndex] = useState(0)
@@ -228,10 +228,8 @@ export default function WordsPage() {
 
     // 检查 localStorage 中是否有相同章节的数据
     const savedState = localStorage.getItem("wordLearningState");
-    console.log('savedState:', savedState);
     if (savedState) {
       const state = JSON.parse(savedState);
-      console.log(state.chapter === chapter, state.examType === examType);
       if (state.words?.length > 0 && 
           state.chapter === chapter && 
           state.examType === examType) {

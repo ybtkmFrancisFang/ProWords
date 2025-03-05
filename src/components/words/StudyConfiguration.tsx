@@ -1,10 +1,11 @@
 import { motion } from "framer-motion";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { GraduationCap, BookText, Loader2 } from "lucide-react";
+import { DictType } from "@/app/types/types";
 
 interface StudyConfigurationProps {
-  examType: "CET4" | "CET6" | "";
-  setExamType: (type: "CET4" | "CET6" | "") => void;
+  examType: DictType | "";
+  setExamType: (type: DictType | "") => void;
   chapter: string;
   setChapter: (chapter: string) => void;
   dictionaryLoading: boolean;
@@ -33,24 +34,40 @@ export function StudyConfiguration({
         <div className="group relative">
           <Select 
             value={examType} 
-            onValueChange={(value: "CET4" | "CET6" | "") => setExamType(value)}
+            onValueChange={(value: DictType) => setExamType(value)}
           >
             <SelectTrigger className="w-[180px] bg-background/80 shadow-sm transition-all group-hover:border-primary/50">
               <SelectValue placeholder="选择词典" />
             </SelectTrigger>
             <SelectContent className="border-primary/10">
-              <SelectItem value="CET4" className="cursor-pointer">
-                <div className="flex items-center gap-2">
-                  <GraduationCap className="h-4 w-4 text-blue-500" />
-                  <span>CET-4</span>
-                </div>
-              </SelectItem>
-              <SelectItem value="CET6" className="cursor-pointer">
-                <div className="flex items-center gap-2">
-                  <GraduationCap className="h-4 w-4 text-purple-500" />
-                  <span>CET-6</span>
-                </div>
-              </SelectItem>
+              {(Object.values(DictType) as DictType[]).sort().map((type) => {
+                const colors: Record<DictType, string> = {
+                  [DictType.CET4]: 'text-blue-500',
+                  [DictType.CET6]: 'text-purple-500',
+                  [DictType.GRE]: 'text-green-500',
+                  [DictType.PTE]: 'text-orange-500',
+                  [DictType.TOEFL]: 'text-red-500',
+                  [DictType.IELTS]: 'text-yellow-500',
+                  [DictType.KAOYAN]: 'text-pink-500',
+                };
+                const displayNames: Record<DictType, string> = {
+                  [DictType.CET4]: 'CET-4',
+                  [DictType.CET6]: 'CET-6',
+                  [DictType.GRE]: 'GRE',
+                  [DictType.PTE]: 'PTE',
+                  [DictType.TOEFL]: 'TOEFL',
+                  [DictType.IELTS]: 'IELTS',
+                  [DictType.KAOYAN]: '考研',
+                };
+                return (
+                  <SelectItem key={type} value={type} className="cursor-pointer">
+                    <div className="flex items-center gap-2">
+                      <GraduationCap className={`h-4 w-4 ${colors[type as DictType]}`} />
+                      <span>{displayNames[type as DictType]}</span>
+                    </div>
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
           

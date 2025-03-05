@@ -12,7 +12,7 @@
 
 <h2 id="chinese">中文介绍</h2>
 
-## ProWords - AI驱动的专业化英语学习平台
+## ProWords - AI + 身份，让单词记忆更有趣、更有效
 
 ProWords 是一个基于人工智能的专业化英语学习平台，为不同职业的人群提供量身定制的英语学习体验。通过整合先进的AI技术，为用户创建职业相关的例句和学习内容。
 
@@ -42,11 +42,30 @@ ProWords 是一个基于人工智能的专业化英语学习平台，为不同�
 - 可多选职业组合，获得多样化的例句
 
 #### AI学习系统
-- CET-4/6 词库支持
+- 丰富词库支持：
+  - CET-4/6（大学英语四六级）
+  - GRE（美国研究生入学考试）
+  - TOEFL（托福考试）
+  - IELTS（雅思考试）
+  - PTE（培生英语考试）
+  - 考研英语
 - 按章节学习
 - 自动保存进度
 - AI智能例句生成
 - 例句重生成功能
+
+### 📸 应用截图
+
+<div align="center">
+  <img src="./public/screenshot/s3.png" alt="ProWords Screenshot 1" width="800" />
+  <p><em>主界面 - 职业背景选择</em></p>
+  
+  <img src="./public/screenshot/s1.png" alt="ProWords Screenshot 2" width="800" />
+  <p><em>单词学习 - AI生成的专业例句</em></p>
+  
+  <img src="./public/screenshot/s2.png" alt="ProWords Screenshot 3" width="800" />
+  <p><em>进度追踪 - 章节完成统计</em></p>
+</div>
 
 #### 界面功能
 - 深色模式支持
@@ -80,17 +99,34 @@ http://localhost:3000
 ### 💯 使用流程
 
 1. 选择职业身份
-2. 选择词库类型（CET-4/6）
+2. 选择词库类型：
+   - CET-4/6（大学英语四六级）
+   - GRE（美国研究生入学考试）
+   - TOEFL（托福考试）
+   - IELTS（雅思考试）
+   - PTE（培生英语考试）
+   - 考研英语
 3. 选择学习章节
 4. 开始学习单词
 5. 查看AI生成的职业相关例句
 6. 不满意可一键重新生成例句
 
+### ☕ 支持项目
+
+<p align="center">
+  <a href="https://www.buymeacoffee.com/winterfx" target="_blank">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50" width="180" >
+    <img src="./public/coffee/c.png" >
+  </a>
+</p>
+
+如果这个项目对你有帮助，欢迎请我喝杯咖啡支持一下！您的支持将帮助我持续改进这个项目。
+
 ---
 
 <h2 id="english">English Introduction</h2>
 
-## ProWords - AI-Powered Professional English Learning Platform
+## ProWords - AI + Professional Identity: Making Word Memorization More Engaging and Effective
 
 ProWords is an AI-powered English learning platform that provides tailored learning experiences for professionals across various industries. By integrating advanced AI technology, it creates career-relevant example sentences and learning content for users.
 
@@ -120,11 +156,30 @@ ProWords is an AI-powered English learning platform that provides tailored learn
 - Multiple profession selection for diverse example sentences
 
 #### AI Learning System
-- CET-4/6 vocabulary support
+- Comprehensive Dictionary Support:
+  - CET-4/6 (College English Test)
+  - GRE (Graduate Record Examination)
+  - TOEFL (Test of English as a Foreign Language)
+  - IELTS (International English Language Testing System)
+  - PTE (Pearson Test of English)
+  - Kaoyan (Chinese Postgraduate Entrance Examination)
 - Chapter-based learning
 - Automatic progress saving
 - AI-powered example sentence generation
 - Sentence regeneration functionality
+
+### 📸 Screenshots
+
+<div align="center">
+  <img src="/screenshot/s1.png" alt="ProWords Screenshot 1" width="800" />
+  <p><em>Main Interface - Dictionary Selection and Learning Progress</em></p>
+  
+  <img src="/screenshot/s2.png" alt="ProWords Screenshot 2" width="800" />
+  <p><em>Word Learning - AI-Generated Professional Examples</em></p>
+  
+  <img src="/screenshot/s3.png" alt="ProWords Screenshot 3" width="800" />
+  <p><em>Progress Tracking - Chapter Completion Statistics</em></p>
+</div>
 
 #### Interface Features
 - Dark mode support
@@ -163,6 +218,16 @@ http://localhost:3000
 4. Start learning words
 5. View AI-generated profession-relevant example sentences
 6. One-click regeneration if not satisfied with examples
+
+### ☕ Support the Project
+
+<p align="center">
+  <a href="https://www.buymeacoffee.com/winterfx" target="_blank">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50" width="180" >
+  </a>
+</p>
+
+If you find this project helpful, consider buying me a coffee! Your support helps me continue improving this project.
 
 ## 📜 License
 

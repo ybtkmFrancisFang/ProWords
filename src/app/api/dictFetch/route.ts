@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
+import { DictType } from '@/app/types/types';
 
 export async function GET(request: NextRequest) {
   try {
     // Get the exam type from the URL
     const searchParams = request.nextUrl.searchParams;
-    const examType = searchParams.get('type');
+    const examType = searchParams.get('type')?.toLocaleUpperCase();
     
     // Validate the exam type
-    if (!examType || (examType !== 'CET4' && examType !== 'CET6')) {
+    if (!examType || !(examType in DictType)) {
       return NextResponse.json(
-        { error: 'Invalid exam type. Must be CET4 or CET6' },
+        { error: 'Invalid exam type' },
         { status: 400 }
       );
     }

@@ -19,7 +19,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Code2, Stethoscope, GraduationCap, Briefcase, X, User, Plus, Palette, ScaleIcon } from 'lucide-react';
+import { Code2, Stethoscope, GraduationCap, Briefcase, X, User, Plus, Palette, ScaleIcon, Github, Coffee } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 
@@ -28,6 +28,7 @@ export default function Home() {
   const [selectedIdentities, setSelectedIdentities] = useState<Profession[]>([]);
   const [customIdentities, setCustomIdentities] = useState<Profession[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [coffeeDialogOpen, setCoffeeDialogOpen] = useState(false);
   const [newIdentity, setNewIdentity] = useState({
     label: '',
     description: '',
@@ -385,6 +386,41 @@ export default function Home() {
             </span>
             <span className="absolute inset-0 -translate-y-full bg-gradient-to-r from-primary to-blue-600 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"></span>
           </Button>
+        </motion.div>
+
+        {/* Footer Links */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.5 }}
+          className="mt-12 flex justify-center gap-6 text-muted-foreground"
+        >
+          <a
+            href="https://github.com/winterfx/prowords"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 transition-colors hover:opacity-80"
+          >
+            <Github className="h-6 w-6 text-[#333333] dark:text-white" />
+          </a>
+          <Dialog open={coffeeDialogOpen} onOpenChange={setCoffeeDialogOpen}>
+            <DialogTrigger asChild>
+              <button className="flex items-center gap-2 transition-colors hover:opacity-80">
+                <Coffee className="h-6 w-6 text-[#C0742E]" />
+              </button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Buy Me a Coffee</DialogTitle>
+                <DialogDescription>
+                  扫码支持一下，谢谢！
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex justify-center p-4">
+                <img src="/coffee/c.png" alt="Buy Me a Coffee QR Code" className="max-h-64 w-auto" />
+              </div>
+            </DialogContent>
+          </Dialog>
         </motion.div>
       </div>
     </div>
