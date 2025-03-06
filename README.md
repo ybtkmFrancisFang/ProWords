@@ -18,12 +18,15 @@ ProWords 是一个基于人工智能的专业化英语学习平台，为不同�
 
 ### 🌟 特色
 
-- 🤖 **AI驱动学习**: 使用先进的AI模型生成与职业相关的自然、专业的例句
-- 👨‍💻 **职业化定制**: 根据不同职业背景智能生成专业相关的例句
-- 🎯 **智能重生成**: 不满意的例句可一键重新生成多种替代选项
-- 🎨 **美观界面**: 采用现代化的UI设计，提供流畅的用户体验
-- 📝 **进度跟踪**: 自动保存学习进度，随时可以继续学习
-- 🔊 **语音支持**: 支持单词和例句的语音播放功能
+🎯 **职业场景定制**：支持多种职业身份组合以及自定义身份，生成贴近工作场景的例句
+
+📚 **丰富词库支持**：覆盖 CET4/6、GRE、TOEFL、IELTS、考研等多个考试词库
+
+🤖 **AI 智能例句**：不满意可一键重新生成，直到符合你的需求
+
+💾 **进度自动保存**：随时可以继续上次的学习进度
+
+🌓 **深色模式**：提供舒适的阅读体验
 
 ### 💻 技术栈
 
@@ -132,12 +135,15 @@ ProWords is an AI-powered English learning platform that provides tailored learn
 
 ### 🌟 Features
 
-- 🤖 **AI-Driven Learning**: Uses advanced AI models to generate natural, profession-specific example sentences
-- 👨‍💻 **Professional Customization**: Intelligently generates examples relevant to different career backgrounds
-- 🎯 **Smart Regeneration**: One-click regeneration of alternative example sentences
-- 🎨 **Beautiful Interface**: Modern UI design providing a smooth user experience
-- 📝 **Progress Tracking**: Automatically saves learning progress for continuous learning
-- 🔊 **Voice Support**: Text-to-speech functionality for words and example sentences
+🎯 **Professional Scenario Customization**: Support for multiple professional identities and custom roles, generating examples that closely match work scenarios
+
+📚 **Rich Vocabulary Support**: Covers multiple exam vocabularies including CET4/6, GRE, TOEFL, IELTS, and Kaoyan
+
+🤖 **AI-Powered Examples**: One-click regeneration until you get the perfect example sentences
+
+💾 **Auto-Save Progress**: Continue from where you left off at any time
+
+🌓 **Dark Mode**: Provides a comfortable reading experience
 
 ### 💻 Tech Stack
 
@@ -171,13 +177,13 @@ ProWords is an AI-powered English learning platform that provides tailored learn
 ### 📸 Screenshots
 
 <div align="center">
-  <img src="/screenshot/s1.png" alt="ProWords Screenshot 1" width="800" />
-  <p><em>Main Interface - Dictionary Selection and Learning Progress</em></p>
+  <img src="./public/screenshot/s3.png" alt="ProWords Screenshot 1" width="800" />
+  <p><em>Main Interface - Professional Background Selection</em></p>
   
-  <img src="/screenshot/s2.png" alt="ProWords Screenshot 2" width="800" />
+  <img src="./public/screenshot/s1.png" alt="ProWords Screenshot 2" width="800" />
   <p><em>Word Learning - AI-Generated Professional Examples</em></p>
   
-  <img src="/screenshot/s3.png" alt="ProWords Screenshot 3" width="800" />
+  <img src="./public/screenshot/s2.png" alt="ProWords Screenshot 3" width="800" />
   <p><em>Progress Tracking - Chapter Completion Statistics</em></p>
 </div>
 
@@ -200,44 +206,43 @@ cd prowords
 pnpm install
 ```
 
-3. Start development server
+3. Start the development server
 ```bash
 pnpm run dev
 ```
 
-4. Access the application
+4. Visit the application
 ```
 http://localhost:3000
 ```
 
 ### 💯 Usage Flow
 
-1. Select professional identity
-2. Choose vocabulary type (CET-4/6)
-3. Select learning chapter
+1. Choose your professional identity
+2. Select vocabulary type:
+   - CET-4/6 (College English Test)
+   - GRE (Graduate Record Examination)
+   - TOEFL (Test of English as a Foreign Language)
+   - IELTS (International English Language Testing System)
+   - PTE (Pearson Test of English)
+   - Kaoyan (Chinese Postgraduate Entrance Examination)
+3. Choose learning chapter
 4. Start learning words
-5. View AI-generated profession-relevant example sentences
-6. One-click regeneration if not satisfied with examples
+5. View AI-generated profession-related examples
+6. One-click regeneration if you're not satisfied
 
 ### ☕ Support the Project
 
 <p align="center">
   <a href="https://www.buymeacoffee.com/winterfx" target="_blank">
     <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50" width="180" >
+    <img src="./public/coffee/c.png" >
   </a>
 </p>
 
-If you find this project helpful, consider buying me a coffee! Your support helps me continue improving this project.
+If this project has been helpful to you, consider buying me a coffee! Your support will help me continue improving this project.
 
-## 📜 License
-
-MIT License
-
-# ProWords Project
-
-## Getting Started
-
-### Environment Setup
+### 🔧 Environment Setup
 
 1. Create a `.env.local` file in the project root:
 
@@ -261,6 +266,10 @@ NEXT_PUBLIC_OPENAI_API_KEY=your_jwt_token_here
 
 These environment variables are essential for the application to connect to the required APIs.
 
-### Running the Project
+## 📜 License
 
-[Additional setup instructions will go here]
+MIT License
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=winterfx/ProWords&type=Date)](https://star-history.com/#winterfx/ProWords&Date)
