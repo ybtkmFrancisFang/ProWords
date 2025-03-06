@@ -262,8 +262,8 @@ NEXT_PUBLIC_OPENAI_API_KEY=your_api_key
 
 Example:
 ```bash
-NEXT_PUBLIC_BASE_URL=https://api.rdsec.trendmicro.com/prod/aiendpoint/v1/
-NEXT_PUBLIC_OPENAI_API_KEY=your_jwt_token_here
+NEXT_PUBLIC_BASE_URL=
+NEXT_PUBLIC_OPENAI_API_KEY=
 ```
 
 These environment variables are essential for the application to connect to the required APIs.
