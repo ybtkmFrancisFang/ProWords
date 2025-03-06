@@ -119,7 +119,7 @@ http://localhost:3000
 <p align="center">
   <a href="https://www.buymeacoffee.com/winterfx" target="_blank">
     <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50" width="180" >
-
+    <br>
     <img src="./public/coffee/c.png" >
   </a>
 </p>
@@ -237,7 +237,7 @@ http://localhost:3000
 <p align="center">
   <a href="https://www.buymeacoffee.com/winterfx" target="_blank">
     <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50" width="180" >
-    
+    <br>
     <img src="./public/coffee/c.png" >
   </a>
 </p>
