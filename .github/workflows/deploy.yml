@@ -15,8 +15,7 @@ jobs:
       - name: Install Zeabur CLI
         run: npm install -g @zeabur/cli
 
-      - name: Login to Zeabur
-        run: zeabur login --token ${{ secrets.ZEABUR_API_TOKEN }}
-
       - name: Deploy to Zeabur
+        env:
+          ZEB_TOKEN: ${{ secrets.ZEB_TOKEN }}
         run: zeabur deploy
