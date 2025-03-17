@@ -19,3 +19,4 @@ jobs:
         env:
           ZEB_TOKEN: ${{ secrets.ZEB_TOKEN }}
         run: zeabur deploy
+        
