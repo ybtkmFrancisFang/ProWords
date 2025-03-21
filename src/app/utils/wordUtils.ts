@@ -41,7 +41,17 @@ export function generatePrompt(words: Word[], profession: Profession): string {
   }
 
 
-  return `为以下单词提供词性、释义和专业例句。每个单词需要至少1-3个释义，每个释义都需要指出词性。例句应该体现该单词在${profession.label}领域中的专业用法。
+  return `为以下单词提供词性和释义，并给出专业例句。每个单词需要1-3个释义，每个释义都需要指出词性（使用英文缩写）。例句应该体现该单词在${profession.label}领域中的专业用法。
+
+词性缩写说明：
+- n. (noun): 名词
+- v. (verb): 动词
+- adj. (adjective): 形容词
+- adv. (adverb): 副词
+- prep. (preposition): 介词
+- conj. (conjunction): 连词
+- pron. (pronoun): 代词
+- art. (article): 冠词
 
 单词列表：
 ${wordStrings.join('\n')}
@@ -52,7 +62,7 @@ ${wordStrings.join('\n')}
     "word1": {
       "translations": [
         {
-          "partOfSpeech": "词性",
+          "partOfSpeech": "n./v./adj./adv.",
           "meaning": "中文释义"
         }
       ],
@@ -63,6 +73,11 @@ ${wordStrings.join('\n')}
     }
   }
 }
+
+注意：
+1. 词性必须使用英文缩写（如 n., v., adj., adv. 等）
+2. 释义使用中文
+3. 例句的英文部分要准确体现该词的专业用法
 `;
 }
 
