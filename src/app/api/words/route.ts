@@ -15,8 +15,8 @@ const CHUNK_SIZE = 5;
 // 处理单个分块的单词
 // 将函数改为导出
 async function processWordChunk(words: Word[], profession: Profession) {
-  const startTime = performance.now();
-  console.time(`processWordChunk-${profession.id}`);
+  // const startTime = performance.now();
+  // console.time(`processWordChunk-${profession.id}`);
 
   const prompt = generatePrompt(words, profession);
   const completion = await client.chat.completions.create({
@@ -31,9 +31,9 @@ async function processWordChunk(words: Word[], profession: Profession) {
     throw new Error('No response from OpenAI');
   }
 
-  const endTime = performance.now();
-  console.timeEnd(`processWordChunk-${profession.id}`);
-  console.log(`处理职业 ${profession.id} 的耗时: ${(endTime - startTime).toFixed(2)}ms`);
+  // const endTime = performance.now();
+  // console.timeEnd(`processWordChunk-${profession.id}`);
+  // console.log(`处理职业 ${profession.id} 的耗时: ${(endTime - startTime).toFixed(2)}ms`);
 
   return { profession, aiResponse };
 }
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     // 初始化响应数组
     const responseWords = words.map(word => ({
       ...word,
-      sentences: new Map<string, string>(),
+      sentences: new Map<string, { en: string; zh?: string }>(),
     }));
 
     // 将单词分块

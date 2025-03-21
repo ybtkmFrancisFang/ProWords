@@ -1,9 +1,17 @@
+export interface Translation {
+  meaning: string;
+  partOfSpeech: string;
+}
+
 export interface Word {
   word: string;
-  trans: string[];
+  translations: Translation[];
   usphone: string;
   ukphone: string;
-  sentences: Map<string, string>;
+  sentences: Map<string, {
+    en: string;
+    zh?: string;
+  }>;
 }
 
 export interface Profession {
@@ -43,7 +51,6 @@ export enum DictType {
 
 export interface DictionaryEntry {
   name: string;
-  trans: string[];
   usphone: string;
   ukphone: string;
 }

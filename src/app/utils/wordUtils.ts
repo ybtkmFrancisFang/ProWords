@@ -1,8 +1,8 @@
 import { Profession, Word, DictionaryEntry } from '../types/types';
 
 // Helper function to create an empty sentences map
-function createEmptySentences(): Map<string, string> {
-  return new Map<string, string>();
+function createEmptySentences(): Map<string, { en: string; zh?: string }> {
+  return new Map<string, { en: string; zh?: string }>();
 }
 
 export function getWordsFromChapter(data: DictionaryEntry[], chapter: number): Word[] {
@@ -12,7 +12,7 @@ export function getWordsFromChapter(data: DictionaryEntry[], chapter: number): W
   
   return data.slice(startIndex, endIndex).map(entry => ({
     word: entry.name,
-    trans: entry.trans,
+    translations: [],
     usphone: entry.usphone,
     ukphone: entry.ukphone,
     sentences: createEmptySentences(),
@@ -41,33 +41,28 @@ export function generatePrompt(words: Word[], profession: Profession): string {
   }
 
 
-  return `You are a language learning assistant. I need you to create memorable example sentences for English vocabulary words.
+  return `为以下单词提供词性、释义和专业例句。每个单词需要至少1-3个释义，每个释义都需要指出词性。例句应该体现该单词在${profession.label}领域中的专业用法。
 
-  Professional Context:
-  ${profession.id} (${profession.description})
+单词列表：
+${wordStrings.join('\n')}
 
-  Requirements:
-  1. For each word, create a sentence that naturally incorporates the word in the context of ${profession.id}'s work environment
-  2. Make sentences moderately difficult - not too simple, not too complex
-  3. Use everyday expressions and relatable scenarios that professionals encounter
-  4. Create sentences that help learners remember the word through practical usage
-  5. Connect the sentences to common workplace situations or daily professional activities
-  6. Focus on practical language that would actually be used in this professional context
-  7. Ensure sentences feel natural and conversational, not academic or textbook-like
-
-  Words to create sentences for:
-  ${wordStrings.map(w => `"${w}"`).join(', ')}
-
-  Format the response as a JSON object with this structure:
-  {
-    "data": [
-      {
-        "word": "example",
-        "sentences": "The software developer created an example to demonstrate how the new feature works in real-world scenarios."
-      },
-      // more words with sentences
-    ]
+请以JSON格式返回，格式如下：
+{
+  "words": {
+    "word1": {
+      "translations": [
+        {
+          "partOfSpeech": "词性",
+          "meaning": "中文释义"
+        }
+      ],
+      "sentence": {
+        "en": "English sentence",
+        "zh": "中文翻译"
+      }
+    }
   }
+}
 `;
 }
 
@@ -87,20 +82,30 @@ export function mergeWordsWithSentences(words: Word[], aiResponse: string, profe
   
   try {
     const parsedResponse = JSON.parse(aiResponse);
-    if (!parsedResponse.data || !Array.isArray(parsedResponse.data)) {
-      throw new Error('Invalid AI response format: data array is missing');
+    if (!parsedResponse.words) {
+      throw new Error('Invalid AI response format: words object is missing');
     }
 
-    const sentencesData = parsedResponse.data as Array<{ word: string; sentences: string }>;
-  
-    words.map(word => {
+    words.forEach(word => {
       if (!word || !word.word) {
         console.warn('Invalid word object:', word);
+        return;
       }
 
-      const matchingSentence = sentencesData.find(s => s.word === word.word);
-      if (matchingSentence && matchingSentence.sentences) {
-        word.sentences.set(profession.id, matchingSentence.sentences);
+      const wordData = parsedResponse.words[word.word];
+      if (wordData) {
+        // Update translations
+        if (wordData.translations) {
+          word.translations = wordData.translations;
+        }
+
+        // Update sentence
+        if (wordData.sentence && wordData.sentence.en) {
+          word.sentences.set(profession.label, {
+            en: wordData.sentence.en,
+            zh: wordData.sentence.zh
+          });
+        }
       }
     });
   } catch (error) {
