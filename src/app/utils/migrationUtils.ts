@@ -47,30 +47,24 @@ export const migrateToLatestVersion = (oldData: Partial<WordLearningState> & { w
     // 迁移 words 数组中的每个单词项
     if (Array.isArray(oldData.words)) {
       const newWords: Word[] = oldData.words.map((word: OldWordStructure): Word => {
+        const newSentences = new Map<string, { en: string; zh?: string }>();
+        
+        // 转换旧的 sentences 结构为新的 Map 结构
+        if (word.sentences) {
+          Object.entries(word.sentences).forEach(([role, sentence]) => {
+            if (typeof sentence === 'string') {
+              newSentences.set(role, { en: sentence });
+            } else if (sentence && typeof sentence === 'object' && 'en' in sentence) {
+              newSentences.set(role, { 
+                en: sentence.en as string,
+                zh: 'zh' in sentence ? sentence.zh as string : undefined
+              });
+            }
+          });
+        }
+
         // 处理旧版本的单词结构
         if (word.trans && !word.translations) {
-          const newSentences = new Map<string, { en: string; zh?: string }>();
-          //抓换旧的trans结构为translations
-          if (Array.isArray(word.trans)) {
-            word.translations = word.trans.map((trans: string) => ({
-              partOfSpeech: "",  // 默认设置为动词，新数据会由 AI 重新生成正确的词性
-              meaning: trans
-            }));
-          }
-          // 转换旧的 sentences 结构为新的 Map 结构
-          if (word.sentences) {
-            Object.entries(word.sentences).forEach(([role, sentence]) => {
-              if (typeof sentence === 'string') {
-                newSentences.set(role, { en: sentence });
-              } else if (sentence && typeof sentence === 'object' && 'en' in sentence) {
-                newSentences.set(role, { 
-                  en: sentence.en as string,
-                  zh: 'zh' in sentence ? sentence.zh as string : undefined
-                });
-              }
-            });
-          }
-
           return {
             word: word.word,
             usphone: word.usphone || '',
@@ -79,15 +73,13 @@ export const migrateToLatestVersion = (oldData: Partial<WordLearningState> & { w
             sentences: newSentences
           };
         }
+
         return {
           word: word.word,
           usphone: word.usphone || '',
           ukphone: word.ukphone || '',
           translations: word.translations || [],
-          sentences: word.sentences ? new Map(Object.entries(word.sentences).map(([key, value]) => [
-            key,
-            typeof value === 'string' ? { en: value } : value
-          ])) : new Map()
+          sentences: newSentences
         };
       });
       data.words = newWords;
