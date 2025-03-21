@@ -2,9 +2,25 @@ import { Word } from '../types/types';
 
 export const CURRENT_VERSION = 2;
 
+interface Identity {
+  id: string;
+  name: string;
+}
+
+type OldSentenceType = string | { en: string; zh?: string };
+
+interface OldWordStructure {
+  word: string;
+  usphone?: string;
+  ukphone?: string;
+  trans?: string[] | string;
+  sentences?: Record<string, OldSentenceType>;
+  translations?: Array<{ partOfSpeech: string; meaning: string }>;
+}
+
 interface WordLearningState {
-  version?: number;
-  selectedIdentities: any[];
+  version: number;
+  selectedIdentities: Identity[];
   words: Word[];
   currentWordIndex: number;
   examType?: string;
@@ -16,14 +32,21 @@ interface WordLearningState {
  * @param oldData 旧版本的数据
  * @returns 迁移后的新版本数据
  */
-export const migrateToLatestVersion = (oldData: any): WordLearningState => {
-  let data = { ...oldData };
+export const migrateToLatestVersion = (oldData: Partial<WordLearningState> & { words?: OldWordStructure[] }): WordLearningState => {
+  const data: WordLearningState = {
+    version: oldData.version || 1,
+    selectedIdentities: oldData.selectedIdentities || [],
+    words: [],
+    currentWordIndex: oldData.currentWordIndex || 0,
+    examType: oldData.examType,
+    chapter: oldData.chapter
+  };
   const version = data.version || 1;
 
   if (version < 2) {
     // 迁移 words 数组中的每个单词项
-    if (Array.isArray(data.words)) {
-      data.words = data.words.map((word: any) => {
+    if (Array.isArray(oldData.words)) {
+      const newWords: Word[] = oldData.words.map((word: OldWordStructure): Word => {
         // 处理旧版本的单词结构
         if (word.trans && !word.translations) {
           const newSentences = new Map<string, { en: string; zh?: string }>();
@@ -49,13 +72,25 @@ export const migrateToLatestVersion = (oldData: any): WordLearningState => {
           }
 
           return {
-            ...word,
-            translations: Array.isArray(word.trans) ? word.trans : [word.trans],
+            word: word.word,
+            usphone: word.usphone || '',
+            ukphone: word.ukphone || '',
+            translations: Array.isArray(word.trans) ? word.trans.map(t => ({ partOfSpeech: '', meaning: t })) : [{ partOfSpeech: '', meaning: word.trans as string }],
             sentences: newSentences
           };
         }
-        return word;
+        return {
+          word: word.word,
+          usphone: word.usphone || '',
+          ukphone: word.ukphone || '',
+          translations: word.translations || [],
+          sentences: word.sentences ? new Map(Object.entries(word.sentences).map(([key, value]) => [
+            key,
+            typeof value === 'string' ? { en: value } : value
+          ])) : new Map()
+        };
       });
+      data.words = newWords;
     }
   }
 
@@ -69,7 +104,7 @@ export const migrateToLatestVersion = (oldData: any): WordLearningState => {
  * @param data 需要验证的数据
  * @returns 数据是否有效
  */
-export const validateData = (data: any): boolean => {
+export const validateData = (data: unknown): boolean => {
   try {
     console.log('Validating data structure...');
     
@@ -77,15 +112,18 @@ export const validateData = (data: any): boolean => {
       console.log('Failed: data is not an object');
       return false;
     }
-    if (!Array.isArray(data.selectedIdentities)) {
+
+    const typedData = data as Partial<WordLearningState>;
+    
+    if (!Array.isArray(typedData.selectedIdentities)) {
       console.log('Failed: selectedIdentities is not an array');
       return false;
     }
-    if (!Array.isArray(data.words)) {
+    if (!Array.isArray(typedData.words)) {
       console.log('Failed: words is not an array');
       return false;
     }
-    if (typeof data.currentWordIndex !== 'number') {
+    if (typeof typedData.currentWordIndex !== 'number') {
       console.log('Failed: currentWordIndex is not a number');
       return false;
     }
