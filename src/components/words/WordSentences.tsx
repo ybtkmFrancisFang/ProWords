@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -14,6 +15,22 @@ import {
   Loader2, 
   ArrowRight 
 } from "lucide-react";
+
+const getPartOfSpeechAbbr = (pos: string): string => {
+  const map: Record<string, string> = {
+    'verb': 'v.',
+    'noun': 'n.',
+    'adjective': 'adj.',
+    'adverb': 'adv.',
+    'preposition': 'prep.',
+    'conjunction': 'conj.',
+    'pronoun': 'pron.',
+    'interjection': 'interj.',
+    'article': 'art.',
+    'auxiliary': 'aux.',
+  }
+  return map[pos.toLowerCase()] || pos
+};
 
 interface WordSentencesProps {
   currentWord: Word;
@@ -39,6 +56,7 @@ export function WordSentences({
   onNextChapter
 }: WordSentencesProps) {
   const [regeneratingProfession, setRegeneratingProfession] = useState<string | null>(null);
+  const [showTranslations, setShowTranslations] = useState<{ [key: string]: boolean }>({});
   const isLastWord = currentWordIndex === wordsLength - 1;
 
   // Helper function to handle regeneration with loading state
@@ -99,15 +117,61 @@ export function WordSentences({
             </Button>
           </div>
 
-          <Button 
-            variant="outline" 
-            size="icon"
-            className="h-10 w-10 shrink-0 rounded-full border-primary/20 bg-background/40 shadow-sm backdrop-blur-sm transition-all hover:border-primary/40 hover:bg-background/60 hover:shadow-md"
-            onClick={handleNextWord}
-            disabled={currentWordIndex === wordsLength - 1}
-          >
-            <ChevronRight className="h-5 w-5" />
-          </Button>
+          {isLastWord && onNextChapter ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+            >
+              <Button
+                onClick={onNextChapter}
+                variant="outline"
+                size="icon"
+                className="group relative h-10 w-10 shrink-0 overflow-hidden rounded-full border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 text-emerald-600 hover:border-emerald-500/50 hover:from-emerald-500/20 hover:to-teal-500/20 hover:text-emerald-500 dark:border-emerald-400/30 dark:text-emerald-400 dark:hover:text-emerald-300 transition-all duration-300"
+              >
+                <motion.div
+                  animate={{ 
+                    x: [0, 4, 0],
+                  }}
+                  transition={{ 
+                    duration: 2, 
+                    repeat: Infinity,
+                    ease: "easeInOut" 
+                  }}
+                  className="flex items-center justify-center gap-1 relative z-10"
+                >
+                  <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-0.5" />
+                </motion.div>
+                <motion.div
+                  className="absolute right-0 top-0 h-1.5 w-1.5 rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 shadow-lg shadow-emerald-500/20"
+                  animate={{
+                    scale: [1, 1.5, 1],
+                    opacity: [0.5, 1, 0.5]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                />
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300"
+                />
+                <motion.div
+                  className="absolute -inset-1 bg-[radial-gradient(circle_at_center,_var(--emerald-500)_0%,_transparent_70%)] opacity-0 group-hover:opacity-20 transition-opacity duration-300"
+                />
+              </Button>
+            </motion.div>
+          ) : (
+            <Button 
+              variant="outline" 
+              size="icon"
+              className="h-10 w-10 shrink-0 rounded-full border-primary/20 bg-background/40 shadow-sm backdrop-blur-sm transition-all hover:border-primary/40 hover:bg-background/60 hover:shadow-md"
+              onClick={handleNextWord}
+              disabled={currentWordIndex === wordsLength - 1}
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          )}
         </div>
         
         {/* Pronunciation */}
@@ -145,8 +209,21 @@ export function WordSentences({
           transition={{ delay: 0.3 }}
           className="mt-6 space-y-1.5 text-center"
         >
-          {currentWord.trans && currentWord.trans.map((meaning, index) => (
-            <div key={index} className="text-lg text-foreground/80">{meaning}</div>
+          {Object.entries(
+            (currentWord.translations || []).reduce((acc, translation) => {
+              const { partOfSpeech, meaning } = translation;
+              const abbr = getPartOfSpeechAbbr(partOfSpeech);
+              if (!acc[abbr]) {
+                acc[abbr] = [];
+              }
+              acc[abbr].push(meaning);
+              return acc;
+            }, {} as Record<string, string[]>)
+          ).map(([partOfSpeech, meanings]) => (
+            <div key={partOfSpeech} className="text-lg text-foreground/80">
+              <span className="text-xs font-medium text-muted-foreground/70 mr-2">{partOfSpeech}</span>
+              {meanings.join('；')}
+            </div>
           ))}
         </motion.div>
       </div>
@@ -154,60 +231,17 @@ export function WordSentences({
       {/* Progress */}
       <div className="relative z-10 border-t border-border/60 bg-background/40 px-6 py-4 backdrop-blur-md">
         <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between text-sm font-medium">
+          <div className="flex items-center justify-between text-sm">
             <div>
               <span className="text-base font-bold text-primary">{currentWordIndex + 1}</span>
               <span className="text-muted-foreground"> / {wordsLength}</span>
             </div>
           </div>
 
-          <div className="relative">
-            <Progress 
-              value={(currentWordIndex + 1) / wordsLength * 100} 
-              className="h-2"
-            />
-            {isLastWord && onNextChapter && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="absolute -right-1 -top-6"
-              >
-                <Button
-                  onClick={onNextChapter}
-                  variant="outline"
-                  size="sm"
-                  className="group relative flex items-center gap-1.5 border-green-500/30 bg-green-500/10 text-green-600 hover:bg-green-500/20 hover:text-green-700 dark:border-green-400/30 dark:text-green-400 dark:hover:text-green-300"
-                >
-                  <motion.div
-                    animate={{ 
-                      x: [0, 3, 0],
-                    }}
-                    transition={{ 
-                      duration: 1.5, 
-                      repeat: Infinity,
-                      ease: "easeInOut" 
-                    }}
-                    className="flex items-center gap-1"
-                  >
-                    下一章
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </motion.div>
-                  <motion.div
-                    className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-green-500"
-                    animate={{
-                      scale: [1, 1.5, 1],
-                      opacity: [0.5, 1, 0.5]
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                  />
-                </Button>
-              </motion.div>
-            )}
-          </div>
+          <Progress 
+            value={(currentWordIndex + 1) / wordsLength * 100} 
+            className="h-2"
+          />
         </div>
       </div>
 
@@ -248,10 +282,23 @@ export function WordSentences({
                             size="icon"
                             variant="ghost"
                             className="h-8 w-8 rounded-full opacity-70 transition-opacity hover:bg-background hover:opacity-100"
-                            onClick={() => playSentenceAudio(sentence)}
+                            onClick={() => playSentenceAudio(sentence.en)}
                           >
                             <Volume2 className="h-3.5 w-3.5" />
                           </Button>
+                          {sentence.zh && (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-8 w-8 rounded-full opacity-70 transition-opacity hover:bg-background hover:opacity-100"
+                              onClick={() => setShowTranslations(prev => ({
+                                ...prev,
+                                [profession]: !prev[profession]
+                              }))}
+                            >
+                              {showTranslations[profession] ? '隐' : '译'}
+                            </Button>
+                          )}
                         </div>
                       </div>
                       
@@ -264,7 +311,14 @@ export function WordSentences({
                             </div>
                           </div>
                         ) : (
-                          <p className="text-lg leading-relaxed">{highlightWord(sentence, currentWord.word)}</p>
+                          <div className="space-y-3">
+                            <p className="text-lg leading-relaxed">{highlightWord(sentence.en, currentWord.word)}</p>
+                            {sentence.zh && showTranslations[profession] && (
+                              <p className="rounded-md bg-muted/50 px-4 py-2 text-sm text-muted-foreground">
+                                {sentence.zh}
+                              </p>
+                            )}
+                          </div>
                         )}
                       </div>
                     </Card>

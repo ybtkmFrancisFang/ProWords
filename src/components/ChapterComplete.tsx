@@ -40,11 +40,12 @@ export function ChapterComplete({
   const isFinalChapter = parseInt(chapter) === chapterCount;
 
   return (
-    <Card className="relative overflow-hidden border-primary/20 bg-card/80 p-8 backdrop-blur-md">
+    <Card className="relative overflow-hidden border-primary/20 bg-card/80 p-8 backdrop-blur-md shadow-lg">
       {/* Background decoration */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 to-background/20"></div>
-      <div className="absolute -left-20 -top-20 h-40 w-40 rounded-full bg-primary/5 blur-3xl"></div>
-      <div className="absolute -right-20 -bottom-20 h-40 w-40 rounded-full bg-purple-500/5 blur-3xl"></div>
+      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/10 via-primary/5 to-background/20"></div>
+      <div className="absolute -left-20 -top-20 h-40 w-40 rounded-full bg-primary/10 blur-3xl animate-pulse"></div>
+      <div className="absolute -right-20 -bottom-20 h-40 w-40 rounded-full bg-purple-500/10 blur-3xl animate-pulse"></div>
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,_var(--primary)_0%,_transparent_70%)] opacity-5"></div>
 
       <div className="flex flex-col items-center text-center">
         {/* Success icon with animation */}
@@ -67,19 +68,23 @@ export function ChapterComplete({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <h2 className="mb-2 text-3xl font-bold tracking-tight">恭喜完成学习！</h2>
-          <p className="mb-6 text-lg text-muted-foreground">
-            你已经成功学完第 {chapter} 章的所有单词
+          <h2 className="mb-3 text-3xl font-bold tracking-tight bg-gradient-to-r from-primary/90 to-purple-500/90 bg-clip-text text-transparent">
+            恭喜完成学习！
+          </h2>
+          <p className="mb-6 text-lg text-muted-foreground/90">
+            你已经成功掌握了第 {chapter} 章的所有单词
           </p>
 
           {/* Completion status */}
-          <div className="mb-8 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <BookOpen className="h-4 w-4 text-primary/70" />
-            <span>
-              {isFinalChapter 
-                ? "🎉 恭喜你学完了所有章节！" 
-                : `进度: ${chapter}/${chapterCount} 章`}
-            </span>
+          <div className="mb-8 flex items-center justify-center gap-3">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary/90">
+              <BookOpen className="h-4 w-4" />
+              <span className="text-sm font-medium">
+                {isFinalChapter 
+                  ? "🎉 完成全部章节" 
+                  : `${chapter}/${chapterCount} 章`}
+              </span>
+            </div>
           </div>
 
           {/* Action buttons */}
@@ -87,20 +92,21 @@ export function ChapterComplete({
             <Button
               onClick={onReviewChapter}
               variant="outline"
-              className="group flex items-center gap-2 border-primary/20 bg-background/60 hover:border-primary/30 hover:bg-background"
+              className="group flex items-center gap-2 border-primary/20 bg-background/60 hover:border-primary/30 hover:bg-background/80 transition-all duration-300"
             >
-              <RefreshCcw className="h-4 w-4 transition-transform group-hover:rotate-180" />
-              <span>重新学习本章</span>
+              <RefreshCcw className="h-4 w-4 transition-transform duration-500 group-hover:rotate-180" />
+              <span>复习本章</span>
             </Button>
 
             {!isFinalChapter && (
               <Button 
                 onClick={onNextChapter}
-                className="group gap-1"
-                variant="default"
+                className="group relative overflow-hidden bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 transition-all duration-300"
               >
-                <span>继续下一章</span>
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <span className="relative z-10 mr-1">继续学习</span>
+                <span className="relative z-10 text-xs text-primary-foreground/80">第 {parseInt(chapter) + 1} 章</span>
+                <ArrowRight className="relative z-10 h-4 w-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--primary)_0%,_transparent_70%)] opacity-50 group-hover:opacity-70 transition-opacity duration-300"></div>
               </Button>
             )}
           </div>

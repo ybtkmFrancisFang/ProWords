@@ -48,10 +48,10 @@ export default function WordsPage() {
 
   const currentWord = words[currentWordIndex] || {
     word: "",
-    trans: [],
+    translations: [],
     usphone: "",
     ukphone: "",
-    sentences: {},
+    sentences: new Map(),
   }
 
 
