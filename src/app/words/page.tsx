@@ -8,6 +8,7 @@ import { BookOpen, Bot, Sparkles } from "lucide-react"
 import { Identity, Word, DictionaryEntry, DictType } from "@/app/types/types"
 import { getWordsFromChapter } from '@/app/utils/wordUtils'
 import { ChapterComplete } from "@/components/ChapterComplete"
+import { CURRENT_VERSION, migrateToLatestVersion, validateData } from '@/app/utils/migrationUtils'
 
 // Import the components from src/components/words/
 import { WordHeader } from "@/components/words/WordHeader"
@@ -147,37 +148,71 @@ export default function WordsPage() {
     }
   }, [selectedIdentities, chapter, examType, dictionary]);
 
+
+
   // 加载保存的状态
   useEffect(() => {
-    const savedState = localStorage.getItem("wordLearningState");
-    if (savedState) {
-      const state = JSON.parse(savedState);
-      if (state.selectedIdentities?.length > 0) {
-        // 恢复所有保存的状态
-        setIsRestoring(true);
-        setSelectedIdentities(state.selectedIdentities);
-        setExamType(state.examType || "");
-        setChapter(state.chapter || "");
-        setCurrentWordIndex(state.currentWordIndex || 0);
-        setWords(state.words || []);
-        setIsRestoring(false);
-        // 如果有完整的学习状态，就不需要重定向到首页
-        return;
-      }
-    }
+    try {
+      const savedState = localStorage.getItem("wordLearningState");
+      
+      if (savedState) {
+        let state = JSON.parse(savedState);
+        // 检查版本并迁移数据
+        if (!state.version || state.version < CURRENT_VERSION) {
+          console.log(`Migrating data from version ${state.version || 1} to ${CURRENT_VERSION}`);
+          state = migrateToLatestVersion(state);
+          // 保存迁移后的数据
+          localStorage.setItem("wordLearningState", JSON.stringify(state));
+        }
 
-    // 如果没有完整的学习状态，检查是否有选择的身份
-    const savedIdentities = localStorage.getItem("selectedIdentities");
-    if (savedIdentities) {
-      const identities = JSON.parse(savedIdentities);
-      if (identities && identities.length > 0) {
-        setSelectedIdentities(identities);
-        return;
+        // 验证数据结构
+        const isValid = validateData(state);
+        
+        if (isValid && state.selectedIdentities?.length > 0) {
+          // 恢复所有保存的状态
+          setIsRestoring(true);
+          setSelectedIdentities(state.selectedIdentities);
+          setExamType(state.examType || "");
+          setChapter(state.chapter || "");
+          setCurrentWordIndex(state.currentWordIndex || 0);
+          setWords(state.words || []);
+          setIsRestoring(false);
+          return;
+        } else {
+          // 提示用户重置
+          const shouldReset = window.confirm('检测到数据结构发生变化，需要重置。点击确定重置并重新开始。');
+          if (shouldReset) {
+            localStorage.removeItem("wordLearningState");
+            localStorage.removeItem("selectedIdentities");
+            window.location.href = "/";
+            return;
+          }
+        }
       }
-    }
 
-    // 如果没有任何状态，重定向到首页
-    window.location.href = "/";
+      // 如果没有完整的学习状态，检查是否有选择的身份
+      const savedIdentities = localStorage.getItem("selectedIdentities");
+      if (savedIdentities) {
+        try {
+          const identities = JSON.parse(savedIdentities);
+          if (identities && Array.isArray(identities) && identities.length > 0) {
+            setSelectedIdentities(identities);
+            return;
+          }
+        } catch (e) {
+          console.error('Error parsing savedIdentities:', e);
+          localStorage.removeItem("selectedIdentities");
+        }
+      }
+
+      // 如果没有任何状态，重定向到首页
+      window.location.href = "/";
+    } catch (e) {
+      console.error('Error loading saved state:', e);
+      localStorage.removeItem("wordLearningState");
+      localStorage.removeItem("selectedIdentities");
+      window.location.href = "/";
+    }
   }, []);  // 只在组件挂载时执行一次
 
     // Clear chapter selection when dictionary type changes,but if come for the previous chapter from localstorage, keep it
@@ -201,8 +236,9 @@ export default function WordsPage() {
 
   // 保存状态到 localStorage
   useEffect(() => {
-    if (!isRestoring &&selectedIdentities.length > 0) {
+    if (!isRestoring && selectedIdentities.length > 0) {
       const stateToSave = {
+        version: CURRENT_VERSION,
         selectedIdentities,
         examType,
         chapter,
@@ -357,6 +393,7 @@ export default function WordsPage() {
       const currentState = JSON.parse(localStorage.getItem("wordLearningState") || "{}");
       const updatedState = {
         ...currentState,
+        version: CURRENT_VERSION,
         chapter: nextChapter,
         currentWordIndex: 0,
         words: [] // Clear words in localStorage
@@ -375,6 +412,7 @@ export default function WordsPage() {
   const onResetLearning = () => {
     // Clear all saved states
     localStorage.removeItem("wordLearningState");
+    localStorage.removeItem("selectedIdentities");
     // Redirect to home page
     window.location.href = "/";
   };
